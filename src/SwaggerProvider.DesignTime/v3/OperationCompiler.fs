@@ -1,4 +1,4 @@
-﻿namespace SwaggerProvider.Internal.v3.Compilers
+namespace SwaggerProvider.Internal.v3.Compilers
 
 open System
 open System.Net.Http
@@ -403,5 +403,21 @@ type OperationCompiler (schema:OpenApiDocument, defCompiler:DefinitionCompiler, 
                 let skipLength = if String.IsNullOrEmpty clientName then 0 else clientName.Length + 1
                 let name = OperationCompiler.GetMethodNameCandidate op skipLength ignoreOperationId
                 compileOperation (methodNameScope.MakeUnique name) op)
+            |> ty.AddMembers
+
+            let tyName = ns.ReserveUniqueName clientName "Paths"
+            let ty = ProvidedTypeDefinition(tyName, baseTy, isErased = false, isSealed = false, hideObjectMethods = true)
+            ns.RegisterType(tyName, ty)
+            if not <| String.IsNullOrEmpty clientName
+            then ty.AddXmlDoc (sprintf "Paths for '%s_*' operations" clientName)
+
+            operations
+            |> List.map (fun (a, b, c) -> a)
+            |> List.distinct
+            |> List.map
+              (
+                fun path ->
+                  ProvidedProperty(path, typeof<string>, isStatic = true, getterCode = fun _ -> <@@ path @@>)
+              )
             |> ty.AddMembers
         )

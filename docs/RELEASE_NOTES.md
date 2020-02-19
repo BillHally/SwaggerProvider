@@ -1,3 +1,6 @@
+#### 0.11.0-beta2 - February 19, 2020
+- Add path properties
+
 #### 0.10.0 - December 8, 2019
 - OpenApiClientProvider
 - .NET Core 3.1 support
